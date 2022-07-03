@@ -3,6 +3,7 @@ using Notes.Persistence;
 using System.Reflection;
 using Notes.Application.Common.Mappings;
 using Notes.Application;
+using Notes.WebApi.Middleware;
 
 const string corsPolicy = "_AlloyAll";
 
@@ -65,6 +66,7 @@ void Configure(WebApplication app)
         app.UseDeveloperExceptionPage();
     }
 
+    app.UseCustomExceptionHandler();
     app.UseRouting();
     app.UseHttpsRedirection();
     app.UseCors(corsPolicy);
