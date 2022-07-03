@@ -1,16 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Notes.Application.Interfaces;
 using Notes.Domain;
 using Notes.Persistence.EntityTypeConfigurations;
 
 namespace Notes.Persistence;
 
-internal class NotesDbContext: DbContext, INotesDbContext
+public class NotesDbContext: DbContext, INotesDbContext
 {
     public DbSet<Note> Notes { get; set; }
 
