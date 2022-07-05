@@ -4,8 +4,11 @@ using System.Reflection;
 using Notes.Application.Common.Mappings;
 using Notes.Application;
 using Notes.WebApi.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 const string corsPolicy = "_AlloyAll";
+const string _appUrl = "https://localhost:7207";
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +46,17 @@ void ConfigureServices(IServiceCollection services)
              policy.AllowAnyOrigin();
          });
     });
+
+    services.AddAuthentication(config =>
+    {
+        config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }).AddJwtBearer("Bearer", options =>
+    {
+        options.Authority = _appUrl;
+        options.Audience = "NotesWebApi";
+        options.RequireHttpsMetadata = false;
+    });
 }
 
 void Configure(WebApplication app)
@@ -70,7 +84,8 @@ void Configure(WebApplication app)
     app.UseRouting();
     app.UseHttpsRedirection();
     app.UseCors(corsPolicy);
-
+    app.UseAuthentication();
+    app.UseAuthorization();
     app.UseEndpoints(endpoints =>
     {
         endpoints.MapControllers();
