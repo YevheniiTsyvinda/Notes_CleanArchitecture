@@ -9,6 +9,10 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.Extensions.Options;
 using Notes.WebApi;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Notes.WebApi.Services;
+using Serilog;
+using Serilog.Events;
+using Serilog.AspNetCore;
 
 const string corsPolicy = "_AlloyAll";
 const string _appUrl = "https://localhost:7207";
@@ -30,6 +34,8 @@ app.Run();
 
 void ConfigureServices(IServiceCollection services)
 {
+    
+
     services.AddAutoMapper(config =>
     {
         config.AddProfile(new AssemblyMappingProfile(Assembly.GetExecutingAssembly()));
@@ -67,10 +73,18 @@ void ConfigureServices(IServiceCollection services)
 
     services.AddSwaggerGen();
     services.AddApiVersioning();
+
+    services.AddSingleton<ICurrentUserService, CurrentUserService>();
+    services.AddHttpContextAccessor();
 }
 
 void Configure(WebApplication app)
 {
+    //-------------------
+    Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+        .WriteTo.File("NotesWebAppLOG-.txt", rollingInterval: RollingInterval.Day)
+        .CreateLogger();
     using (var scope = app.Services.CreateScope())
     {
         var serviceProvider = scope.ServiceProvider;
@@ -81,14 +95,16 @@ void Configure(WebApplication app)
         }
         catch (Exception ex)
         {
-
+            Log.Fatal(ex, "An error occurred while app initialization");
         }
     }
+    //-------------------
 
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
     }
+
 
     app.UseSwagger();
     app.UseSwaggerUI(config=>
